@@ -13,8 +13,8 @@ router.put("/:id", verifyToken, async (req, res, next) => {
   if (req.params.id === req.user.id) {
     try {
       const updatedUser = await User.findByIdAndUpdate(req.params.id, {
-        $set: res.body,
-      });
+        $set: req.body,
+      },{new: true});
       res.status(200).json(updatedUser);
     } catch (error) {
       next(error);
@@ -44,8 +44,17 @@ router.get("/find/:id", (req, res, next) => {
 // method : DELETE
 //  api : api/users/test
 
-router.delete("/:id", (req, res, next) => {
-  res.json("its successfull");
+router.delete("/:id", verifyToken, async (req, res, next) => {
+  if (req.params.id === req.user.id) {
+    try {
+      await User.findByIdAndDelete(req.params.id);
+      res.status(200).json("User has been deleted!");
+    } catch (error) {
+      next(error);
+    }
+  } else {
+    return next(createError(403, "You can only update your account."));
+  }
 });
 
 // subscribe a video
